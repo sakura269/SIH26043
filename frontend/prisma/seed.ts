@@ -217,7 +217,7 @@ async function main() {
       email: 'sunita.mentor@techsolutions.com',
       passwordHash,
       phone: '+91-9876543215',
-      role: UserRole.INDUSTRY_MENTOR,
+      role: UserRole.MENTOR,
       accountStatus: AccountStatus.ACTIVE,
       location: 'Pune',
       regionId: region1.id,

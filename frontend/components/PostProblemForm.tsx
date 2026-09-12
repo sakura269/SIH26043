@@ -72,9 +72,11 @@ interface UploadedFile {
 
 interface PostProblemFormProps {
   onSubmitSuccess: (problem: Problem, files: File[]) => boolean | Promise<boolean>;
+  ownerUserId: string;
+  regionId: string;
 }
 
-export default function PostProblemForm({ onSubmitSuccess }: PostProblemFormProps) {
+export default function PostProblemForm({ onSubmitSuccess, ownerUserId, regionId }: PostProblemFormProps) {
   const [step, setStep] = useState(1);
   const [giverType, setGiverType] = useState<"individual" | "community_group">("individual");
   const [communityGroupName, setCommunityGroupName] = useState("");
@@ -192,21 +194,21 @@ export default function PostProblemForm({ onSubmitSuccess }: PostProblemFormProp
       giverType === "individual" ? "Sarthak Nehe" : communityGroupName.trim() || "Community Action Group";
 
     const problem: Problem = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       title: draftTitle.trim() || "Community Societal Challenge",
       description: draftStatement.trim(),
-      category: (draftCategory || "Other") as ProblemCategory,
-      location: draftArea.trim() || "Location pending",
+      category: draftCategory || "Other",
+      location: draftArea.trim() || "Location not specified",
       citizenName,
-      citizenAvatar: giverType === "individual" ? "SN" : "👥",
-      date: "Just now",
+      citizenAvatar: "",
+      date: new Date().toISOString(),
       status: "Submitted",
       supporters: 0,
       comments: [],
-      progress: 5,
+      progress: 0,
       currentStep: 1,
       rawInput: rawText.trim() || draftStatement.trim(),
-      problemNature: (draftNature || "Hybrid") as ProblemNature,
+      problemNature: draftNature || "Hybrid",
       affectedArea: draftArea.trim(),
       affectedPopulation: draftPopulation.trim(),
       frequency: draftFrequency.trim(),
@@ -215,17 +217,22 @@ export default function PostProblemForm({ onSubmitSuccess }: PostProblemFormProp
       confirmedByGiver: true,
       problemGiverType: giverType,
       communityGroupName: giverType !== "individual" ? communityGroupName.trim() : undefined,
-      image: "📋",
     };
 
-    const success = await onSubmitSuccess(problem, files.map((item) => item.file));
-    if (success) {
-      setSubmittedProblemId(problem.id);
-      setStep(3);
-    } else {
-      setSubmitError("We could not submit your problem. Check that the API is running and try again.");
+    try {
+      const success = await onSubmitSuccess(problem, files.map((item) => item.file));
+      if (success) {
+        setSubmittedProblemId(problem.id);
+        setStep(3);
+      } else {
+        setSubmitError("Problem created but callback failed.");
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+      setSubmitError(err instanceof Error ? err.message : "Failed to submit problem. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   const handleReset = () => {

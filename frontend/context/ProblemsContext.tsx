@@ -80,9 +80,27 @@ export function ProblemsProvider({ children }: { children: ReactNode }) {
           supporters: problem.supporters,
           progress: problem.progress,
           current_step: problem.currentStep,
+          raw_input: problem.rawInput,
+          problem_nature: problem.problemNature,
+          affected_population: problem.affectedPopulation,
+          frequency: problem.frequency,
+          required_capabilities: problem.requiredCapabilities,
+          confirmed_by_giver: problem.confirmedByGiver,
+          problem_giver_type: problem.problemGiverType,
+          community_group_name: problem.communityGroupName,
         }),
       });
-      if (!response.ok) return null;
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type") ?? "";
+        let message = "";
+        if (contentType.includes("application/json")) {
+          const errorBody = await response.json();
+          message = errorBody.detail ?? errorBody.error ?? "";
+        } else {
+          message = (await response.text()).slice(0, 200);
+        }
+        throw new Error(message || `Problem submission failed (${response.status})`);
+      }
       const saved = await response.json();
       setMyProblems((previous) => [toFrontendProblem(saved), ...previous]);
       return saved.id ?? null;
