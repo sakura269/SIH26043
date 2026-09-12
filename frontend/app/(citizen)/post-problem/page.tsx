@@ -26,6 +26,10 @@ export default function PostProblemPage() {
     return true;
   };
 
+  // TODO: Get from auth context/session
+  const ownerUserId = "citizen-user-id"; // Replace with actual user ID from session
+  const regionId = "region-1"; // Replace with actual region ID from user profile
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -49,7 +53,7 @@ export default function PostProblemPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-        <PostProblemForm onSubmitSuccess={handleSubmitSuccess} />
+        <PostProblemForm onSubmitSuccess={handleSubmitSuccess} ownerUserId={ownerUserId} regionId={regionId} />
       </div>
     </div>
   );

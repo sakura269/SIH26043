@@ -31,10 +31,13 @@ Connects to:
 """
 
 import json
+import os
 import re
 from typing import Dict, List, Optional
 
-with open("data/mentors.json", "r", encoding="utf-8") as f:
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+
+with open(os.path.join(DATA_DIR, "mentors.json"), "r", encoding="utf-8") as f:
     _MENTORS = json.load(f)["mentors"]
 
 

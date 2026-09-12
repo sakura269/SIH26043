@@ -1,4 +1,5 @@
 import json
+import os
 from pydantic import BaseModel
 
 from gemini_utils import generate_text
@@ -11,7 +12,7 @@ class ClassificationResult(BaseModel):
     reason: str
 
 
-with open("data/taxonomy.json", "r", encoding="utf-8") as file:
+with open(os.path.join(os.path.dirname(__file__), "data", "taxonomy.json"), "r", encoding="utf-8") as file:
     taxonomy = json.load(file)
 
 

@@ -117,19 +117,20 @@ model User {
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
 
-  universityStudents   UniversityStudent[]
-  universityMentors    UniversityMentor[]
-  universityFaculty    UniversityFaculty[]
-  industryEmployees    IndustryEmployee[]
-  industryMentors      IndustryMentor[]
-  industryExperts      IndustryExpert[]
-  governmentOfficers   GovernmentOfficer[]
-  ownedProblems        Problem[]                @relation("ProblemOwner")
-  projectMembers       ProjectMember[]
-  skills               UserSkill[]
-  matches              Match[]                  @relation("MatchUser")
-  evidence             Evidence[]
-  verificationHistory  VerificationHistory[]    @relation("VerificationOfficer")
+  universityStudents     UniversityStudent[]
+  universityMentors      UniversityMentor[]
+  universityFaculty      UniversityFaculty[]
+  industryEmployees      IndustryEmployee[]
+  industryMentors        IndustryMentor[]
+  industryExperts        IndustryExpert[]
+  governmentOfficers     GovernmentOfficer[]
+  ownedProblems          Problem[]                @relation("ProblemOwner")
+  projectMembers         ProjectMember[]
+  skills                 UserSkill[]
+  matches                Match[]                  @relation("MatchUser")
+  evidence               Evidence[]
+  verificationHistory    GovernmentOfficer[]      @relation("VerificationOfficer")
+  region                 Region?                  @relation(fields: [regionId], references: [id])
 
   @@map("users")
 }
@@ -146,6 +147,7 @@ model Region {
   universities University[]
   industries   Industry[]
   problems     Problem[]
+  governments  Government[]
 
   @@map("regions")
 }
@@ -174,6 +176,7 @@ model University {
   mentors            UniversityMentor[]
   teams              UniversityTeam[]
   projects           Project[]        @relation("UniversityProjects")
+  collaborations     Collaboration[]
 
   @@map("universities")
 }
@@ -195,7 +198,6 @@ model UniversityStudent {
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   teamMembers UniversityTeamMember[]
-  projectMembers ProjectMember[]
 
   @@map("university_students")
 }
@@ -214,7 +216,6 @@ model UniversityFaculty {
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
-  projectMembers ProjectMember[]
 
   @@map("university_faculty")
 }
@@ -233,7 +234,6 @@ model UniversityMentor {
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
-  projectMembers ProjectMember[]
 
   @@map("university_mentors")
 }
@@ -291,6 +291,7 @@ model Industry {
   experts     IndustryExpert[]
   teams       IndustryTeam[]
   projects    Project[]        @relation("IndustryProjects")
+  collaborations Collaboration[]
 
   @@map("industries")
 }
@@ -309,7 +310,6 @@ model IndustryEmployee {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   industry  Industry  @relation(fields: [industryId], references: [id], onDelete: Cascade)
   teamMembers IndustryTeamMember[]
-  projectMembers ProjectMember[]
 
   @@map("industry_employees")
 }
@@ -328,7 +328,6 @@ model IndustryMentor {
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   industry  Industry  @relation(fields: [industryId], references: [id], onDelete: Cascade)
-  projectMembers ProjectMember[]
 
   @@map("industry_mentors")
 }
@@ -345,7 +344,6 @@ model IndustryExpert {
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   industry  Industry  @relation(fields: [industryId], references: [id], onDelete: Cascade)
-  projectMembers ProjectMember[]
 
   @@map("industry_experts")
 }
@@ -396,6 +394,7 @@ model Government {
 
   region   Region             @relation(fields: [regionId], references: [id])
   officers GovernmentOfficer[]
+  collaborations Collaboration[]
 
   @@map("governments")
 }
@@ -412,7 +411,8 @@ model GovernmentOfficer {
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   government Government @relation(fields: [governmentId], references: [id], onDelete: Cascade)
-  verificationHistory VerificationHistory[]
+  verificationHistory VerificationHistory[] @relation("VerificationHistoryOfficer")
+  userVerificationHistory User[] @relation("VerificationOfficer")
 
   @@map("government_officers")
 }
@@ -457,6 +457,7 @@ model Problem {
   evidence       Evidence[]
   verificationHistory VerificationHistory[]
   skills         ProblemSkill[]
+  collaborations Collaboration[]
 
   @@map("problems")
 }
@@ -588,7 +589,7 @@ model VerificationHistory {
   createdAt       DateTime @default(now()) @map("created_at")
 
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  officer GovernmentOfficer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  officer GovernmentOfficer @relation("VerificationHistoryOfficer", fields: [officerId], references: [id], onDelete: Cascade)
 
   @@map("verification_history")
 }
